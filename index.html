@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Plex On - Redirecting to Stream</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: linear-gradient(135deg, #090d16 0%, #0d1527 100%); color: #ffffff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; }
+        .card { background: rgba(22, 30, 49, 0.9); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 24px; padding: 36px 28px; max-width: 420px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        .logo { font-size: 42px; margin-bottom: 12px; }
+        h1 { font-size: 22px; font-weight: 800; margin-bottom: 8px; color: #00e5ff; }
+        p { font-size: 14px; color: #94a3b8; margin-bottom: 24px; line-height: 1.5; }
+        .btn-launch { display: block; width: 100%; padding: 15px; background: #00e5ff; color: #070d18; font-size: 16px; font-weight: 700; border-radius: 12px; text-decoration: none; margin-bottom: 20px; }
+        .fallback { font-size: 12px; color: #64748b; }
+        .fallback a { color: #00e5ff; text-decoration: none; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="logo">▶</div>
+    <h1>Opening in Plex On...</h1>
+    <p id="status">Connecting your stream directly to Plex On Player...</p>
+    <a href="#" id="playBtn" class="btn-launch">Tap to Open in Plex On</a>
+    <div class="fallback">
+        App not installed?<br>
+        <a href="https://play.google.com/store/apps/details?id=com.glowwrostudio.plexon" target="_blank">Download Plex On from Google Play</a>
+    </div>
+</div>
+<script>
+    (function() {
+        const params = new URLSearchParams(window.location.search);
+        let streamUrl = params.get('stream') || params.get('url') || params.get('play');
+        if (!streamUrl) {
+            document.getElementById('status').innerText = "No stream link provided.";
+            document.getElementById('playBtn').style.display = 'none';
+            return;
+        }
+        try { if (streamUrl.includes('%3A%2F%2F')) streamUrl = decodeURIComponent(streamUrl); } catch(e) {}
+        
+        // Plex On Intent Call
+        const intentUrl = "intent://play?url=" + encodeURIComponent(streamUrl) + 
+                          "#Intent;scheme=plexon;package=com.glowwrostudio.plexon;action=android.intent.action.VIEW;end";
+        document.getElementById('playBtn').href = intentUrl;
+        
+        // 0.35 সেকেন্ডে স্বয়ংক্রিয়ভাবে সরাসরি অ্যাপ ওপেন
+        setTimeout(() => { window.location.href = intentUrl; }, 350);
+        document.getElementById('playBtn').addEventListener('click', (e) => { e.preventDefault(); window.location.href = intentUrl; });
+    })();
+</script>
+</body>
+</html>
